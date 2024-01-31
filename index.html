@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+<html lang="es">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Control de Vencimiento de Despensa</title>
+    <link rel="stylesheet" href="styles.css" />
+  </head>
+  <body>
+    <form id="formulario-despensa">
+      <label for="categoria">Categoría:</label>
+      <select id="categoria" required>
+        <option value="Alimentos">Alimentos</option>
+        <option value="Condimentos">Condimentos</option>
+        <option value="Botiquin">Botiquín</option>
+        <option value="HigienePersonal">Higiene Personal</option>
+        <option value="Limpieza">Limpieza</option>
+      </select>
+
+      <label for="articulo">Artículo:</label>
+      <input type="text" id="articulo" required />
+
+      <label for="cantidad">Cantidad:</label>
+      <input type="number" id="cantidad" required />
+
+      <label for="unidad-medida">Unidad de Medida:</label>
+      <select id="unidad-medida" required>
+        <option value="Unidades">Unidades</option>
+        <option value="Litros">Litros</option>
+        <option value="Kilogramos">Kilogramos</option>
+        <option value="Gramos">Gramos</option>
+      </select>
+
+      <label for="fecha-compra">Fecha de compra:</label>
+      <input type="date" id="fecha-compra" required />
+
+      <label for="fecha-vencimiento">Fecha de vencimiento:</label>
+      <input type="date" id="fecha-vencimiento" required />
+
+      <label for="costo">Costo:</label>
+      <input type="number" id="costo" required />
+
+      <button type="button" onclick="agregarArticulo()">Agregar</button>
+    </form>
+
+    <h2>Control de Vencimiento de Despensa</h2>
+
+    <div id="lista-despensa">
+      <table>
+        <thead>
+          <tr>
+            <th>Categoría</th>
+            <th>Artículo</th>
+            <th>Cantidad</th>
+            <th>Unidad de Medida</th>
+            <th>Fecha de compra</th>
+            <th>Fecha de vencimiento</th>
+            <th>Costo</th>
+            <th>Acciones</th>
+          </tr>
+        </thead>
+        <tbody id="tabla-despensa-body">
+          <!-- Contenido de la tabla -->
+        </tbody>
+      </table>
+    </div>
+
+    <button id="imprimir-btn" onclick="imprimirLista()">Imprimir Lista</button>
+
+    <script src="script.js"></script>
+  </body>
+</html>
