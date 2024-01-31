@@ -1,3 +1,49 @@
+var listaDespensa = [];
+var articulosExistentes = [];
+
+function agregarArticulo() {
+  var categoria = document.getElementById("categoria").value;
+  var articuloInput = document.getElementById("articulo");
+  var cantidad = document.getElementById("cantidad").value;
+  var unidadMedida = document.getElementById("unidad-medida").value;
+  var fechaCompra = document.getElementById("fecha-compra").value;
+  var fechaVencimiento = document.getElementById("fecha-vencimiento").value;
+  var costo = document.getElementById("costo").value;
+
+  var articulo = articuloInput.value.toLowerCase();
+
+  if (
+    articulo &&
+    cantidad &&
+    unidadMedida &&
+    fechaCompra &&
+    fechaVencimiento &&
+    costo
+  ) {
+    var nuevoArticulo = {
+      categoria: categoria,
+      articulo: articulo,
+      cantidad: cantidad,
+      unidadMedida: unidadMedida,
+      fechaCompra: fechaCompra,
+      fechaVencimiento: fechaVencimiento,
+      costo: parseFloat(costo),
+    };
+
+    listaDespensa.push(nuevoArticulo);
+
+    // Agregar el artículo a la lista de existentes solo si no existe
+    if (!articulosExistentes.includes(articulo)) {
+      articulosExistentes.push(articulo);
+    }
+
+    document.getElementById("formulario-despensa").reset();
+    actualizarListaVisual();
+  } else {
+    alert("Por favor, complete todos los campos.");
+  }
+}
+
 function actualizarListaVisual() {
   var tablaDespensa = document.getElementById("tabla-despensa-body");
   tablaDespensa.innerHTML = "";
@@ -15,23 +61,15 @@ function actualizarListaVisual() {
   });
 
   listaDespensa.forEach(function (articulo, index) {
-    if (articulo.categoria !== categoriaActual) {
-      categoriaActual = articulo.categoria;
-      var espacioCategoria = document.createElement("tr");
-      espacioCategoria.innerHTML = `
-        <td colspan="7"><strong>${categoriaActual}</strong></td>
-      `;
-      tablaDespensa.appendChild(espacioCategoria);
-    }
-
     var nuevaFila = document.createElement("tr");
     nuevaFila.innerHTML = `
+      <td>${articulo.categoria}</td>
       <td>${articulo.articulo}</td>
       <td>${articulo.cantidad}</td>
-      <td>${articulo.unidadMedida}</td>
-      <td>${articulo.fechaCompra}</td>
-      <td>${articulo.fechaVencimiento}</td>
-      <td>${articulo.costo}</td>
+      <td>${articulo.unidadMedidaAbreviada}</td>
+      <td>${formatoFecha(articulo.fechaCompra)}</td>
+      <td>${formatoFecha(articulo.fechaVencimiento)}</td>
+      <td>${articulo.costo.toFixed(2)}</td>
       <td><button onclick="eliminarArticulo(${index})">Eliminar</button></td>
     `;
 
@@ -65,7 +103,10 @@ function actualizarListaVisual() {
       nuevaFilaTotalCategoria.innerHTML = `
         <td colspan="3"></td>
         <td><strong>Total ${categoriaActual}</strong></td>
-        <td><strong>${totalPorCategoria[categoriaActual]}</strong></td>
+        <td><strong>${totalPorCategoria[categoriaActual].toFixed(
+          2
+        )}</strong></td>
+        <td></td>
         <td></td>
         <td></td>
       `;
@@ -79,7 +120,8 @@ function actualizarListaVisual() {
   nuevaFilaTotalGeneral.innerHTML = `
     <td colspan="3"></td>
     <td><strong>Total General</strong></td>
-    <td><strong>${totalGeneral}</strong></td>
+    <td><strong>${totalGeneral.toFixed(2)}</strong></td>
+    <td></td>
     <td></td>
     <td></td>
   `;
@@ -87,4 +129,47 @@ function actualizarListaVisual() {
   tablaDespensa.appendChild(nuevaFilaTotalGeneral);
 
   localStorage.setItem("listaDespensa", JSON.stringify(listaDespensa));
+  localStorage.setItem(
+    "articulosExistentes",
+    JSON.stringify(articulosExistentes)
+  );
 }
+
+function imprimirLista() {
+  window.print();
+}
+
+function eliminarArticulo(index) {
+  listaDespensa.splice(index, 1);
+  actualizarListaVisual();
+}
+
+function formatoFecha(fecha) {
+  var partes = fecha.split("-");
+  return `${partes[2]}/${partes[1]}/${partes[0]}`;
+}
+
+window.onload = function () {
+  var storedList = localStorage.getItem("listaDespensa");
+  var storedArticulosExistentes = localStorage.getItem("articulosExistentes");
+
+  if (storedList) {
+    listaDespensa = JSON.parse(storedList);
+  }
+
+  if (storedArticulosExistentes) {
+    articulosExistentes = JSON.parse(storedArticulosExistentes);
+  }
+
+  actualizarListaVisual();
+};
+
+// Código para el autocompletado
+document.addEventListener("DOMContentLoaded", function () {
+  var articuloInput = document.getElementById("articulo");
+  new Awesomplete(articuloInput, {
+    list: articulosExistentes,
+    minChars: 1,
+    autoFirst: true,
+  });
+});
