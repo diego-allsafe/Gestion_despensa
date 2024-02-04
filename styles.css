@@ -50,9 +50,6 @@ td {
   border: 1px solid #ddd;
   padding: 8px;
   text-align: left;
-  white-space: nowrap; /* Evita que el texto se divida en varias líneas */
-  overflow: hidden;
-  text-overflow: ellipsis; /* Agrega puntos suspensivos (...) si el texto es demasiado largo */
 }
 
 th {

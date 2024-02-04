@@ -1,42 +1,24 @@
 var listaDespensa = [];
-var articulosExistentes = [];
 
 function agregarArticulo() {
   var categoria = document.getElementById("categoria").value;
-  var articuloInput = document.getElementById("articulo");
+  var articulo = document.getElementById("articulo").value;
   var cantidad = document.getElementById("cantidad").value;
-  var unidadMedida = document.getElementById("unidad-medida").value;
   var fechaCompra = document.getElementById("fecha-compra").value;
   var fechaVencimiento = document.getElementById("fecha-vencimiento").value;
   var costo = document.getElementById("costo").value;
 
-  var articulo = articuloInput.value.toLowerCase();
-
-  if (
-    articulo &&
-    cantidad &&
-    unidadMedida &&
-    fechaCompra &&
-    fechaVencimiento &&
-    costo
-  ) {
+  if (articulo && cantidad && fechaCompra && fechaVencimiento && costo) {
     var nuevoArticulo = {
       categoria: categoria,
       articulo: articulo,
       cantidad: cantidad,
-      unidadMedida: unidadMedida,
       fechaCompra: fechaCompra,
       fechaVencimiento: fechaVencimiento,
       costo: parseFloat(costo),
     };
 
     listaDespensa.push(nuevoArticulo);
-
-    // Agregar el artículo a la lista de existentes solo si no existe
-    if (!articulosExistentes.includes(articulo)) {
-      articulosExistentes.push(articulo);
-    }
-
     document.getElementById("formulario-despensa").reset();
     actualizarListaVisual();
   } else {
@@ -61,12 +43,21 @@ function actualizarListaVisual() {
   });
 
   listaDespensa.forEach(function (articulo, index) {
+    if (articulo.categoria !== categoriaActual) {
+      categoriaActual = articulo.categoria;
+      var espacioCategoria = document.createElement("tr");
+      espacioCategoria.innerHTML = `
+        <td colspan="6"><strong>${categoriaActual}</strong></td>
+        <td></td>
+      `;
+      tablaDespensa.appendChild(espacioCategoria);
+    }
+
     var nuevaFila = document.createElement("tr");
     nuevaFila.innerHTML = `
       <td>${articulo.categoria}</td>
       <td>${articulo.articulo}</td>
       <td>${articulo.cantidad}</td>
-      <td>${articulo.unidadMedidaAbreviada}</td>
       <td>${formatoFecha(articulo.fechaCompra)}</td>
       <td>${formatoFecha(articulo.fechaVencimiento)}</td>
       <td>${articulo.costo.toFixed(2)}</td>
@@ -101,13 +92,10 @@ function actualizarListaVisual() {
     ) {
       var nuevaFilaTotalCategoria = document.createElement("tr");
       nuevaFilaTotalCategoria.innerHTML = `
-        <td colspan="3"></td>
-        <td><strong>Total ${categoriaActual}</strong></td>
+        <td colspan="5"><strong>Total ${categoriaActual}</strong></td>
         <td><strong>${totalPorCategoria[categoriaActual].toFixed(
           2
         )}</strong></td>
-        <td></td>
-        <td></td>
         <td></td>
       `;
       tablaDespensa.appendChild(nuevaFilaTotalCategoria);
@@ -118,21 +106,14 @@ function actualizarListaVisual() {
 
   var nuevaFilaTotalGeneral = document.createElement("tr");
   nuevaFilaTotalGeneral.innerHTML = `
-    <td colspan="3"></td>
-    <td><strong>Total General</strong></td>
+    <td colspan="5"><strong>Total General</strong></td>
     <td><strong>${totalGeneral.toFixed(2)}</strong></td>
-    <td></td>
-    <td></td>
     <td></td>
   `;
 
   tablaDespensa.appendChild(nuevaFilaTotalGeneral);
 
   localStorage.setItem("listaDespensa", JSON.stringify(listaDespensa));
-  localStorage.setItem(
-    "articulosExistentes",
-    JSON.stringify(articulosExistentes)
-  );
 }
 
 function imprimirLista() {
@@ -144,32 +125,15 @@ function eliminarArticulo(index) {
   actualizarListaVisual();
 }
 
+window.onload = function () {
+  var storedList = localStorage.getItem("listaDespensa");
+  if (storedList) {
+    listaDespensa = JSON.parse(storedList);
+    actualizarListaVisual();
+  }
+};
+
 function formatoFecha(fecha) {
   var partes = fecha.split("-");
   return `${partes[2]}/${partes[1]}/${partes[0]}`;
 }
-
-window.onload = function () {
-  var storedList = localStorage.getItem("listaDespensa");
-  var storedArticulosExistentes = localStorage.getItem("articulosExistentes");
-
-  if (storedList) {
-    listaDespensa = JSON.parse(storedList);
-  }
-
-  if (storedArticulosExistentes) {
-    articulosExistentes = JSON.parse(storedArticulosExistentes);
-  }
-
-  actualizarListaVisual();
-};
-
-// Código para el autocompletado
-document.addEventListener("DOMContentLoaded", function () {
-  var articuloInput = document.getElementById("articulo");
-  new Awesomplete(articuloInput, {
-    list: articulosExistentes,
-    minChars: 1,
-    autoFirst: true,
-  });
-});
