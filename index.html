@@ -23,6 +23,13 @@
       <label for="cantidad">Cantidad:</label>
       <input type="number" id="cantidad" required />
 
+      <label for="unidad-medida">Unidad de Medida:</label>
+      <select id="unidad-medida" required>
+        <option value="LT">Litros (LT)</option>
+        <option value="KG">Kilogramos (KG)</option>
+        <option value="UN">Unidades (UN)</option>
+      </select>
+
       <label for="fecha-compra">Fecha de compra:</label>
       <input type="date" id="fecha-compra" required />
 
@@ -30,7 +37,7 @@
       <input type="date" id="fecha-vencimiento" required />
 
       <label for="costo">Costo:</label>
-      <input type="number" id="costo" required />
+      <input type="number" id="costo" step="0.01" required />
 
       <button type="button" onclick="agregarArticulo()">Agregar</button>
     </form>
@@ -43,7 +50,8 @@
           <tr>
             <th>Categoría</th>
             <th>Artículo</th>
-            <th>Cantidad</th>
+            <th>Q.</th>
+            <th>Unidad</th>
             <th>Fecha de compra</th>
             <th>Fecha de vencimiento</th>
             <th>Costo</th>
@@ -59,5 +67,24 @@
     <button id="imprimir-btn" onclick="imprimirLista()">Imprimir Lista</button>
 
     <script src="script.js"></script>
+
+    <script>
+      document.addEventListener("DOMContentLoaded", function () {
+        var scriptAwesomplete = document.createElement("script");
+        scriptAwesomplete.src =
+          "https://cdnjs.cloudflare.com/ajax/libs/awesomplete/1.7.6/awesomplete.min.js";
+        scriptAwesomplete.onload = function () {
+          // Ahora podemos usar Awesomplete de manera segura
+          var articuloInput = document.getElementById("articulo");
+          new Awesomplete(articuloInput, {
+            list: articulosExistentes,
+            minChars: 1,
+            autoFirst: true,
+          });
+        };
+
+        document.head.appendChild(scriptAwesomplete);
+      });
+    </script>
   </body>
 </html>

@@ -1,24 +1,42 @@
 var listaDespensa = [];
+var articulosExistentes = [];
 
 function agregarArticulo() {
   var categoria = document.getElementById("categoria").value;
-  var articulo = document.getElementById("articulo").value;
+  var articuloInput = document.getElementById("articulo");
   var cantidad = document.getElementById("cantidad").value;
+  var unidadMedida = document.getElementById("unidad-medida").value;
   var fechaCompra = document.getElementById("fecha-compra").value;
   var fechaVencimiento = document.getElementById("fecha-vencimiento").value;
   var costo = document.getElementById("costo").value;
 
-  if (articulo && cantidad && fechaCompra && fechaVencimiento && costo) {
+  var articulo = articuloInput.value.toLowerCase();
+
+  if (
+    articulo &&
+    cantidad &&
+    unidadMedida &&
+    fechaCompra &&
+    fechaVencimiento &&
+    costo
+  ) {
     var nuevoArticulo = {
       categoria: categoria,
       articulo: articulo,
       cantidad: cantidad,
+      unidadMedida: unidadMedida,
       fechaCompra: fechaCompra,
       fechaVencimiento: fechaVencimiento,
       costo: parseFloat(costo),
     };
 
     listaDespensa.push(nuevoArticulo);
+
+    // Agregar el artículo a la lista de existentes solo si no existe
+    if (!articulosExistentes.includes(articulo)) {
+      articulosExistentes.push(articulo);
+    }
+
     document.getElementById("formulario-despensa").reset();
     actualizarListaVisual();
   } else {
@@ -28,11 +46,21 @@ function agregarArticulo() {
 
 function actualizarListaVisual() {
   var tablaDespensa = document.getElementById("tabla-despensa-body");
+  if (!tablaDespensa) {
+    console.error("Error: No se pudo encontrar la tabla.");
+    return;
+  }
+
   tablaDespensa.innerHTML = "";
 
   var totalGeneral = 0;
   var totalPorCategoria = {};
   var categoriaActual = null;
+
+  if (!listaDespensa || !Array.isArray(listaDespensa)) {
+    console.error("Error: La lista de despensa no es válida.");
+    return;
+  }
 
   listaDespensa.sort((a, b) => {
     if (a.categoria !== b.categoria) {
@@ -58,6 +86,7 @@ function actualizarListaVisual() {
       <td>${articulo.categoria}</td>
       <td>${articulo.articulo}</td>
       <td>${articulo.cantidad}</td>
+      <td>${articulo.unidadMedida}</td>
       <td>${formatoFecha(articulo.fechaCompra)}</td>
       <td>${formatoFecha(articulo.fechaVencimiento)}</td>
       <td>${articulo.costo.toFixed(2)}</td>
@@ -92,10 +121,13 @@ function actualizarListaVisual() {
     ) {
       var nuevaFilaTotalCategoria = document.createElement("tr");
       nuevaFilaTotalCategoria.innerHTML = `
-        <td colspan="5"><strong>Total ${categoriaActual}</strong></td>
+        <td colspan="3"></td>
+        <td><strong>Total ${categoriaActual}</strong></td>
         <td><strong>${totalPorCategoria[categoriaActual].toFixed(
           2
         )}</strong></td>
+        <td></td>
+        <td></td>
         <td></td>
       `;
       tablaDespensa.appendChild(nuevaFilaTotalCategoria);
@@ -106,14 +138,21 @@ function actualizarListaVisual() {
 
   var nuevaFilaTotalGeneral = document.createElement("tr");
   nuevaFilaTotalGeneral.innerHTML = `
-    <td colspan="5"><strong>Total General</strong></td>
+    <td colspan="3"></td>
+    <td><strong>Total General</strong></td>
     <td><strong>${totalGeneral.toFixed(2)}</strong></td>
+    <td></td>
+    <td></td>
     <td></td>
   `;
 
   tablaDespensa.appendChild(nuevaFilaTotalGeneral);
 
   localStorage.setItem("listaDespensa", JSON.stringify(listaDespensa));
+  localStorage.setItem(
+    "articulosExistentes",
+    JSON.stringify(articulosExistentes)
+  );
 }
 
 function imprimirLista() {
@@ -125,15 +164,39 @@ function eliminarArticulo(index) {
   actualizarListaVisual();
 }
 
-window.onload = function () {
-  var storedList = localStorage.getItem("listaDespensa");
-  if (storedList) {
-    listaDespensa = JSON.parse(storedList);
-    actualizarListaVisual();
-  }
-};
-
 function formatoFecha(fecha) {
   var partes = fecha.split("-");
   return `${partes[2]}/${partes[1]}/${partes[0]}`;
 }
+
+window.onload = function () {
+  console.log("La página ha sido completamente cargada");
+  var storedList = localStorage.getItem("listaDespensa");
+  var storedArticulosExistentes = localStorage.getItem("articulosExistentes");
+
+  console.log("Datos almacenados en listaDespensa:", storedList);
+  console.log(
+    "Datos almacenados en articulosExistentes:",
+    storedArticulosExistentes
+  );
+
+  if (storedList) {
+    listaDespensa = JSON.parse(storedList) || [];
+  }
+
+  if (storedArticulosExistentes) {
+    articulosExistentes = JSON.parse(storedArticulosExistentes) || [];
+  }
+
+  actualizarListaVisual();
+};
+
+// Código para el autocompletado
+document.addEventListener("DOMContentLoaded", function () {
+  var articuloInput = document.getElementById("articulo");
+  new Awesomplete(articuloInput, {
+    list: articulosExistentes,
+    minChars: 1,
+    autoFirst: true,
+  });
+});

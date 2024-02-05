@@ -78,4 +78,22 @@ th {
   #tabla-despensa-body .a-vencer {
     color: red; /* Puedes ajustar el color según tu preferencia */
   }
+
+  table {
+    page-break-inside: auto;
+  }
+
+  tr {
+    page-break-inside: avoid;
+    page-break-after: auto;
+  }
+
+  td {
+    page-break-inside: avoid;
+  }
+
+  /* Evitar división de líneas para la descripción */
+  #tabla-despensa-body td:nth-child(2) {
+    white-space: nowrap;
+  }
 }
