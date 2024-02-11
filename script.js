@@ -62,9 +62,12 @@ function actualizarListaVisual() {
     return;
   }
 
+  // Ordenar por categoría, luego por artículo y finalmente por fecha de vencimiento
   listaDespensa.sort((a, b) => {
     if (a.categoria !== b.categoria) {
       return a.categoria.localeCompare(b.categoria);
+    } else if (a.articulo !== b.articulo) {
+      return a.articulo.localeCompare(b.articulo);
     } else {
       return new Date(a.fechaVencimiento) - new Date(b.fechaVencimiento);
     }
@@ -75,8 +78,7 @@ function actualizarListaVisual() {
       categoriaActual = articulo.categoria;
       var espacioCategoria = document.createElement("tr");
       espacioCategoria.innerHTML = `
-        <td colspan="6"><strong>${categoriaActual}</strong></td>
-        <td></td>
+        <td colspan="7"><strong>${categoriaActual}</strong></td>
       `;
       tablaDespensa.appendChild(espacioCategoria);
     }
@@ -111,31 +113,47 @@ function actualizarListaVisual() {
     tablaDespensa.appendChild(nuevaFila);
 
     if (!totalPorCategoria[articulo.categoria]) {
-      totalPorCategoria[articulo.categoria] = 0;
+      totalPorCategoria[articulo.categoria] = {};
     }
-    totalPorCategoria[articulo.categoria] += articulo.costo;
 
+    // Verificar si el artículo ya existe en la categoría actual
+    if (!totalPorCategoria[articulo.categoria][articulo.articulo]) {
+      totalPorCategoria[articulo.categoria][articulo.articulo] = 0;
+    }
+
+    // Sumar la cantidad del artículo dentro de la categoría actual
+    totalPorCategoria[articulo.categoria][articulo.articulo] += parseInt(
+      articulo.cantidad
+    );
+
+    // Verificar si es el último elemento de la categoría actual
     if (
       index === listaDespensa.length - 1 ||
       listaDespensa[index + 1].categoria !== categoriaActual
     ) {
-      var nuevaFilaTotalCategoria = document.createElement("tr");
-      nuevaFilaTotalCategoria.innerHTML = `
-        <td colspan="3"></td>
-        <td><strong>Total ${categoriaActual}</strong></td>
-        <td><strong>${totalPorCategoria[categoriaActual].toFixed(
-          2
-        )}</strong></td>
-        <td></td>
-        <td></td>
-        <td></td>
-      `;
-      tablaDespensa.appendChild(nuevaFilaTotalCategoria);
+      // Mostrar subtotales por cada artículo dentro de la categoría
+      for (const [articuloNombre, cantidad] of Object.entries(
+        totalPorCategoria[categoriaActual]
+      )) {
+        var nuevaFilaSubtotal = document.createElement("tr");
+        nuevaFilaSubtotal.innerHTML = `
+          <td>${categoriaActual}</td>
+          <td><strong>${articuloNombre} (Subtotal)</strong></td>
+          <td>${cantidad}</td>
+          <td></td>
+          <td></td>
+          <td></td>
+          <td></td>
+          <td></td>
+        `;
+        tablaDespensa.appendChild(nuevaFilaSubtotal);
+      }
     }
 
     totalGeneral += articulo.costo;
   });
 
+  // Mostrar el total general
   var nuevaFilaTotalGeneral = document.createElement("tr");
   nuevaFilaTotalGeneral.innerHTML = `
     <td colspan="3"></td>
